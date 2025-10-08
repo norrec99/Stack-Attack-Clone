@@ -14,8 +14,15 @@ public class BackgroundScroller : MonoBehaviour
         Rect uv = rawImage.uvRect;
         uv.y += scrollSpeed * Time.deltaTime;
 
-        if (uv.y > 1f) uv.y -= Mathf.Floor(uv.y);
-        if (uv.y < 0f) uv.y += Mathf.Ceil(-uv.y);
+        if (uv.y > 1f)
+        {
+            uv.y -= Mathf.Floor(uv.y);
+        }
+
+        if (uv.y < 0f)
+        {
+            uv.y += Mathf.Ceil(-uv.y);
+        }
 
         rawImage.uvRect = uv;
     }
