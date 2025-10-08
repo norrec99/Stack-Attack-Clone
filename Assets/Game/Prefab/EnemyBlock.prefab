@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4554940975484450780}
   - component: {fileID: 1226268817119796791}
   - component: {fileID: 8619710415630742540}
+  - component: {fileID: 2163217312897510608}
   - component: {fileID: 4996500222144539627}
   - component: {fileID: -1576251156082434990}
   m_Layer: 0
@@ -111,6 +112,33 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 2300293154119789534, guid: cabaaf748ff28ee46b78f37a139abac3, type: 3}
+--- !u!54 &2163217312897510608
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6426034162023618789}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!114 &4996500222144539627
 MonoBehaviour:
   m_ObjectHideFlags: 0

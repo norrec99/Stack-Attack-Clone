@@ -4,18 +4,26 @@ using UnityEngine;
 public class EnemyBlock : MonoBehaviour
 {
     [SerializeField] private float baseHp = 10f;
+    public Health Health { get; private set; }
+    public bool IsAlive { get; private set; } = true;
 
-    private Health health;
+    private Rigidbody rb;
 
     private void Awake()
     {
-        health = GetComponent<Health>();
-        health.SetMax(baseHp, true);
+        rb = GetComponent<Rigidbody>();
+        Health = GetComponent<Health>();
+        Health.SetMax(baseHp, true);
+        Health.onDeath.AddListener(() =>
+        {
+            IsAlive = false;
+        });
     }
 
     public void SetHp(float hp)
     {
         baseHp = hp;
-        health.SetMax(baseHp, true);
+        Health.SetMax(baseHp, true);
+        IsAlive = true;
     }
 }
