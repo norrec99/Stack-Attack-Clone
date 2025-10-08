@@ -721,7 +721,7 @@ MonoBehaviour:
   spawnZ: 20
   planeY: 0
   firstDelay: 1
-  interval: 1.2
+  interval: 4
   stacksPerWave: 2
   level: 1
 --- !u!4 &936134277

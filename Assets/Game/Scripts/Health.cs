@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public class Health : MonoBehaviour, IDamageable
 {
     [SerializeField] private float maxHealth = 10f;
-    [SerializeField] private bool destroyOnDeath = true;
+    [SerializeField] private bool destroyOnDeath = false;
 
     public UnityEvent onDamaged;
     public UnityEvent onDeath;

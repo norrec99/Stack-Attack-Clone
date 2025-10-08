@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class StackEnemy : MonoBehaviour
@@ -13,6 +14,10 @@ public class StackEnemy : MonoBehaviour
     [Header("Motion (on Z axis)")]
     [SerializeField] private float moveSpeedZ = -2.0f;
     [SerializeField] private float despawnBeyondZ = -15f;
+
+    [Header("Settle Animation")]
+    [SerializeField] private float settleDuration = 0.12f;
+    [SerializeField] private Ease settleEase = Ease.OutCubic;
 
     private readonly List<EnemyBlock> blocks = new List<EnemyBlock>();
     private int aliveBlocks;
@@ -50,24 +55,79 @@ public class StackEnemy : MonoBehaviour
             float hp = hpBase + hpPerRow * (i + level);
             b.SetHp(hp);
 
-            // count alive on death
-            b.Health.onDeath.AddListener(OnChildBlockDeath);
+            b.Died += OnBlockDied;
 
             blocks.Add(b);
             aliveBlocks++;
         }
 
         // ensure list is sorted by height (highest last)
-        blocks.Sort((a, b) => a.transform.localPosition.y.CompareTo(b.transform.localPosition.y));
+        blocks.Sort((a, b) =>
+        {
+            if (a == null || b == null)
+            {
+                return 0;
+            }
+            return a.transform.localPosition.y.CompareTo(b.transform.localPosition.y);
+        });
     }
 
-    private void OnChildBlockDeath()
+    private void OnBlockDied(EnemyBlock dead)
     {
-        aliveBlocks--;
+        aliveBlocks -= 1;
+
+
         if (aliveBlocks <= 0)
         {
             Destroy(gameObject);
+            return;
         }
+
+        transform.DOKill(false);
+        Sequence nudge = DOTween.Sequence();
+        nudge.Append(transform.DOLocalMoveY(-0.05f, 0.05f));
+        nudge.Append(transform.DOLocalMoveY(0f, 0.06f)).SetEase(Ease.OutCubic);
+
+        SettleBlocksDOTween();
+    }
+
+    private void SettleBlocksDOTween()
+    {
+        // collect alive in current vertical order (bottom → top)
+        List<EnemyBlock> alive = new List<EnemyBlock>(blocks.Count);
+
+        for (int i = 0; i < blocks.Count; i++)
+        {
+            EnemyBlock b = blocks[i];
+
+            if (b != null && b.IsAlive == true)
+            {
+                alive.Add(b);
+            }
+        }
+
+        // tween each alive block to its compacted slot
+        for (int i = 0; i < alive.Count; i++)
+        {
+            Transform t = alive[i].transform;
+
+            Vector3 target = new Vector3(0f, i * blockSpacingY, 0f);
+
+            t.DOKill(false);
+            t.DOLocalMove(target, settleDuration).SetEase(settleEase);
+        }
+
+        // rebuild list order bottom → top
+        blocks.Clear();
+        blocks.AddRange(alive);
+        blocks.Sort((a, b) =>
+        {
+            if (a == null || b == null)
+            {
+                return 0;
+            }
+            return a.transform.localPosition.y.CompareTo(b.transform.localPosition.y);
+        });
     }
 
     /// <summary>
@@ -87,5 +147,18 @@ public class StackEnemy : MonoBehaviour
         }
         // no alive blocks -> destroy stack (safety)
         Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        // kill any tweens targeting children to avoid leaks
+        for (int i = 0; i < blocks.Count; i++)
+        {
+            if (blocks[i] != null)
+            {
+                blocks[i].transform.DOKill(false);
+            }
+        }
+        transform.DOKill(false);
     }
 }
