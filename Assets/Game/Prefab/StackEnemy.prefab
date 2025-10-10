@@ -49,7 +49,7 @@ MonoBehaviour:
   blockSpacingY: 0.1
   hpBase: 10
   hpPerRow: 2
-  moveSpeedZ: -2
+  moveSpeedZ: -1
   despawnBeyondZ: -15
   settleDuration: 0
   settleEase: 9

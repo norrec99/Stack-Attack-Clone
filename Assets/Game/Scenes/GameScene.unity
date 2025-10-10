@@ -696,7 +696,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 936134277}
-  - component: {fileID: 936134276}
+  - component: {fileID: 936134278}
   m_Layer: 0
   m_Name: EnemySpawner
   m_TagString: Untagged
@@ -704,26 +704,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &936134276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936134275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e523c3a3d2766e49aa6036be35d6e19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainCam: {fileID: 330585545}
-  stackPrefab: {fileID: 7648379176636947995, guid: b9010afac7f0a1148b5fec2055e268aa, type: 3}
-  spawnZ: 20
-  planeY: 0
-  firstDelay: 1
-  interval: 4
-  stacksPerWave: 2
-  level: 1
 --- !u!4 &936134277
 Transform:
   m_ObjectHideFlags: 0
@@ -739,6 +719,41 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &936134278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936134275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715b47a5e24185640af2dca06f3a6d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCam: {fileID: 330585545}
+  stackPrefab: {fileID: 7648379176636947995, guid: b9010afac7f0a1148b5fec2055e268aa, type: 3}
+  planeY: 0
+  spawnZCenter: 18
+  spawnZJitter: 0
+  level: 1
+  hCountMin: 3
+  hCountMax: 7
+  vCountMin: 3
+  vCountMax: 7
+  cCountMin: 5
+  cCountMax: 12
+  cRadiusMin: 4
+  cRadiusMax: 10
+  faceOutward: 1
+  randomizeFormationEachWave: 1
+  weightHorizontal: 2
+  weightVertical: 1
+  weightCircle: 0.5
+  loopFormation: 1
+  runLoop: 1
+  firstDelay: 1
+  interval: 5
 --- !u!1 &1179115373
 GameObject:
   m_ObjectHideFlags: 0
