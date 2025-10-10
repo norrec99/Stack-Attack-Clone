@@ -33,6 +33,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (GameState.IsGameOver == true)
+        {
+            return;
+        }
+        
         HandleInput();
         ApplyMovement();
     }

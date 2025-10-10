@@ -21,6 +21,11 @@ public class WeaponAutoFire : MonoBehaviour
 
     private void Update()
     {
+        if (GameState.IsGameOver == true)
+        {
+            return;
+        }
+        
         UpdateHoldState();
         TickCooldown();
 

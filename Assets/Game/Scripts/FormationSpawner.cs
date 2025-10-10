@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class FormationSpawner : MonoBehaviour
 {
+    // -------- Types --------
     public enum Formation
     {
         HorizontalLine,
@@ -11,41 +12,47 @@ public class FormationSpawner : MonoBehaviour
         Circle
     }
 
+    // -------- Refs --------
     [Header("Refs")]
     [SerializeField] private Camera mainCam;
     [SerializeField] private StackEnemy stackPrefab;
 
+    // -------- Gameplay Plane / Depth --------
     [Header("Gameplay Plane / Depth")]
-    [SerializeField] private float planeY = 0f;              // keep y=0 gameplay
-    [SerializeField] private float spawnZCenter = 18f;       // base Z for formations
-    [SerializeField] private float spawnZJitter = 0f;        // optional random Z offset per formation
+    [SerializeField] private float planeY = 0f;
+    [SerializeField] private float spawnZCenter = 18f;
+    [SerializeField] private float spawnZJitter = 0f;
     [SerializeField] private int level = 1;
 
-    // Screen-to-plane bounds (computed)
+    // computed screen-to-plane bounds
     private float minX;
     private float maxX;
     private int lastW;
     private int lastH;
 
-    // Prefab footprint (measured once)
+    // measured prefab footprint
     private float stackWidthX = 1f;
     private float stackDepthZ = 1f;
 
+    // -------- Horizontal Line --------
     [Header("Horizontal Line (randomized)")]
     [SerializeField] private int hCountMin = 3;
     [SerializeField] private int hCountMax = 7;
 
+    // -------- Vertical Line --------
     [Header("Vertical Line (randomized)")]
     [SerializeField] private int vCountMin = 3;
     [SerializeField] private int vCountMax = 7;
 
+    // -------- Circle --------
     [Header("Circle (randomized)")]
     [SerializeField] private int cCountMin = 5;
     [SerializeField] private int cCountMax = 12;
-    [SerializeField] private float cRadiusMin = 4f; 
+    [SerializeField] private float cRadiusMin = 4f;
     [SerializeField] private float cRadiusMax = 10f;
     [SerializeField] private bool faceOutward = true;
 
+    // -------- Formation Randomization --------
     [Header("Formation Randomization")]
     [SerializeField] private bool randomizeFormationEachWave = true;
     [SerializeField] private float weightHorizontal = 1f;
@@ -53,10 +60,17 @@ public class FormationSpawner : MonoBehaviour
     [SerializeField] private float weightCircle = 1f;
     [SerializeField] private Formation loopFormation = Formation.HorizontalLine;
 
+    // -------- Loop control --------
     [Header("Loop (optional)")]
     [SerializeField] private bool runLoop = true;
     [SerializeField] private float firstDelay = 1f;
     [SerializeField] private float interval = 2f;
+
+    private Coroutine loopCo;
+    public bool IsRunning { get; private set; }
+
+    // -------- Singleton --------
+    public static FormationSpawner Instance { get; private set; }
 
     private void Awake()
     {
@@ -64,6 +78,14 @@ public class FormationSpawner : MonoBehaviour
         {
             mainCam = Camera.main;
         }
+
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
     }
 
     private void Start()
@@ -73,7 +95,7 @@ public class FormationSpawner : MonoBehaviour
 
         if (runLoop == true)
         {
-            StartCoroutine(Loop());
+            StartLoop();
         }
     }
 
@@ -85,57 +107,97 @@ public class FormationSpawner : MonoBehaviour
         }
     }
 
+    public void StartLoop()
+    {
+        if (loopCo != null)
+        {
+            StopCoroutine(loopCo);
+        }
+
+        IsRunning = true;
+        loopCo = StartCoroutine(Loop());
+    }
+
+    public void StopLoop()
+    {
+        IsRunning = false;
+
+        if (loopCo != null)
+        {
+            StopCoroutine(loopCo);
+            loopCo = null;
+        }
+    }
+
+    public void StopLoopAndDisable()
+    {
+        StopLoop();
+        enabled = false;
+    }
+
+    public void SpawnRandomFormationNow()
+    {
+        if (GameState.IsGameOver == true)
+        {
+            return;
+        }
+
+        SpawnFormation(ChooseRandomFormation());
+    }
+
+    public void SpawnFormation(Formation f)
+    {
+        if (GameState.IsGameOver == true)
+        {
+            return;
+        }
+
+        switch (f)
+        {
+            case Formation.HorizontalLine:
+                SpawnHorizontalLineRandom();
+                break;
+
+            case Formation.VerticalLine:
+                SpawnVerticalLineRandom();
+                break;
+
+            case Formation.Circle:
+                SpawnCircleRandom();
+                break;
+        }
+    }
+
     private IEnumerator Loop()
     {
         yield return new WaitForSeconds(firstDelay);
 
         while (true)
         {
-            Formation f;
-
-            if (randomizeFormationEachWave == true)
+            if (GameState.IsGameOver == true)
             {
-                f = ChooseRandomFormation();
-            }
-            else
-            {
-                f = loopFormation;
+                StopLoop();
+                yield break;
             }
 
+            Formation f = randomizeFormationEachWave ? ChooseRandomFormation() : loopFormation;
             SpawnFormation(f);
+
             level += 1;
 
-            yield return new WaitForSeconds(interval);
-        }
-    }
+            float t = 0f;
+            while (t < interval)
+            {
+                if (GameState.IsGameOver == true)
+                {
+                    StopLoop();
+                    yield break;
+                }
 
-    // -------- Public API --------
-
-    public void SpawnFormation(Formation f)
-    {
-        switch (f)
-        {
-            case Formation.HorizontalLine:
-            {
-                SpawnHorizontalLineRandom();
-                break;
-            }
-            case Formation.VerticalLine:
-            {
-                SpawnVerticalLineRandom();
-                break;
-            }
-            case Formation.Circle:
-            {
-                SpawnCircleRandom();
-                break;
+                t += Time.deltaTime;
+                yield return null;
             }
         }
-    }
-
-    public void SpawnRandomFormationNow()
-    {
-        SpawnFormation(ChooseRandomFormation());
     }
 
     private void SpawnHorizontalLineRandom()
@@ -148,11 +210,7 @@ public class FormationSpawner : MonoBehaviour
 
         float minCenter = minX + edgePad + half;
         float maxCenter = maxX - edgePad - half;
-
-        if (minCenter > maxCenter)
-        {
-            return;
-        }
+        if (minCenter > maxCenter) return;
 
         float centerX = Random.Range(minCenter, maxCenter);
         float z = spawnZCenter + Random.Range(-spawnZJitter, spawnZJitter);
@@ -163,7 +221,6 @@ public class FormationSpawner : MonoBehaviour
         {
             float x = startX + i * stackWidthX;
             Vector3 pos = new Vector3(x, 0f, z);
-
             StackEnemy e = Instantiate(stackPrefab, pos, Quaternion.identity);
             e.Build(level);
         }
@@ -176,11 +233,7 @@ public class FormationSpawner : MonoBehaviour
         float edgePad = stackWidthX * 0.5f;
         float minXCenter = minX + edgePad;
         float maxXCenter = maxX - edgePad;
-
-        if (minXCenter > maxXCenter)
-        {
-            return;
-        }
+        if (minXCenter > maxXCenter) return;
 
         float x = Random.Range(minXCenter, maxXCenter);
 
@@ -192,7 +245,6 @@ public class FormationSpawner : MonoBehaviour
         {
             float z = startZ + i * stackDepthZ;
             Vector3 pos = new Vector3(x, 0f, z);
-
             StackEnemy e = Instantiate(stackPrefab, pos, Quaternion.identity);
             e.Build(level);
         }
@@ -204,13 +256,9 @@ public class FormationSpawner : MonoBehaviour
 
         float edgePad = stackWidthX * 0.5f;
         float visibleWidth = (maxX - minX) - 2f * edgePad;
+        if (visibleWidth <= 0.01f) return;
 
-        if (visibleWidth <= 0.01f)
-        {
-            return;
-        }
-
-        float chordNeeded = Mathf.Max(stackWidthX, stackDepthZ);
+        float chordNeeded = Mathf.Max(stackWidthX, stackDepthZ); // widest footprint
         float rTouch = chordNeeded / (2f * Mathf.Sin(Mathf.PI / count));
 
         float rMaxFit = visibleWidth * 0.5f;
@@ -219,11 +267,7 @@ public class FormationSpawner : MonoBehaviour
 
         float minCenter = minX + edgePad + R;
         float maxCenter = maxX - edgePad - R;
-
-        if (minCenter > maxCenter)
-        {
-            return;
-        }
+        if (minCenter > maxCenter) return;
 
         float centerX = Random.Range(minCenter, maxCenter);
         float centerZ = spawnZCenter + Random.Range(-spawnZJitter, spawnZJitter);
@@ -240,14 +284,12 @@ public class FormationSpawner : MonoBehaviour
             float z = centerZ + Mathf.Sin(rad) * R;
 
             Vector3 pos = new Vector3(x, 0f, z);
-
             StackEnemy e = Instantiate(stackPrefab, pos, Quaternion.identity);
             e.Build(level);
 
             if (faceOutward == true)
             {
                 Vector3 outward = new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad));
-
                 if (outward.sqrMagnitude > 0.0001f)
                 {
                     e.transform.rotation = Quaternion.LookRotation(outward, Vector3.up);
@@ -263,7 +305,6 @@ public class FormationSpawner : MonoBehaviour
         float wC = Mathf.Max(0f, weightCircle);
 
         float total = wH + wV + wC;
-
         if (total <= 0f)
         {
             return loopFormation;
@@ -299,6 +340,8 @@ public class FormationSpawner : MonoBehaviour
         }
 
         Plane plane = new Plane(Vector3.up, new Vector3(0f, planeY, 0f));
+
+        // slightly below mid-screen so rays tilt downward even with level camera
         float sampleY = Screen.height * 0.35f;
         float enter;
 
@@ -324,6 +367,7 @@ public class FormationSpawner : MonoBehaviour
 
     private void MeasureFootprint()
     {
+        // Spawn a probe offscreen, build it, read bounds, destroy.
         Vector3 probePos = new Vector3(10000f, 0f, 10000f);
         StackEnemy probe = Instantiate(stackPrefab, probePos, Quaternion.identity);
         probe.Build(level);
@@ -333,16 +377,14 @@ public class FormationSpawner : MonoBehaviour
 
         for (int i = 0; i < rends.Length; i++)
         {
-            Renderer r = rends[i];
-
             if (combined == null)
             {
-                combined = r.bounds;
+                combined = rends[i].bounds;
             }
             else
             {
                 Bounds b = combined.Value;
-                b.Encapsulate(r.bounds);
+                b.Encapsulate(rends[i].bounds);
                 combined = b;
             }
         }

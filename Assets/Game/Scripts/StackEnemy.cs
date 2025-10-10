@@ -24,6 +24,11 @@ public class StackEnemy : MonoBehaviour
 
     private void Update()
     {
+        if (GameState.IsGameOver == true)
+        {
+            return;
+        }
+
         transform.position += new Vector3(0f, 0f, moveSpeedZ * Time.deltaTime);
 
         if ((moveSpeedZ < 0f && transform.position.z < despawnBeyondZ) ||
