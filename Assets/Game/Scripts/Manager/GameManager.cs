@@ -49,6 +49,8 @@ public class GameManager : MonoBehaviour
             gun.enabled = false;
         }
 
+        LevelManager.Instance?.LevelFailed();
+
         // Pause DOTween (optional)
         DOTween.PauseAll();
 

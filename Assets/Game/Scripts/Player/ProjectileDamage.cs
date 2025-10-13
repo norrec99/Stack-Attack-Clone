@@ -34,12 +34,20 @@ public class ProjectileDamage : MonoBehaviour
         if (stack != null)
         {
             stack.TakeTopDamage(damage);
-
-            if (destroyOnHit == true)
-            {
-                Destroy(gameObject);
-            }
             return;
+        }
+        else
+        {
+            Health hp = other.GetComponentInParent<Health>();
+            if (hp != null)
+            {
+                hp.TakeDamage(damage);
+            }
+        }
+
+        if (destroyOnHit == true)
+        {
+            Destroy(gameObject);
         }
     }
 }

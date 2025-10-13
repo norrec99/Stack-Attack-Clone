@@ -69,6 +69,8 @@ public class FormationSpawner : MonoBehaviour
     private Coroutine loopCo;
     public bool IsRunning { get; private set; }
 
+    public System.Action<StackEnemy> OnSpawnedEnemy;
+
     // -------- Singleton --------
     public static FormationSpawner Instance { get; private set; }
 
@@ -223,6 +225,7 @@ public class FormationSpawner : MonoBehaviour
             Vector3 pos = new Vector3(x, 0f, z);
             StackEnemy e = Instantiate(stackPrefab, pos, Quaternion.identity);
             e.Build(level);
+            OnSpawnedEnemy?.Invoke(e);
         }
     }
 
@@ -247,6 +250,7 @@ public class FormationSpawner : MonoBehaviour
             Vector3 pos = new Vector3(x, 0f, z);
             StackEnemy e = Instantiate(stackPrefab, pos, Quaternion.identity);
             e.Build(level);
+            OnSpawnedEnemy?.Invoke(e);
         }
     }
 
@@ -286,6 +290,7 @@ public class FormationSpawner : MonoBehaviour
             Vector3 pos = new Vector3(x, 0f, z);
             StackEnemy e = Instantiate(stackPrefab, pos, Quaternion.identity);
             e.Build(level);
+            OnSpawnedEnemy?.Invoke(e);
 
             if (faceOutward == true)
             {
